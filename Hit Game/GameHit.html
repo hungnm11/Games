@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    
+  </head>
+  
+  <body>
+    <canvas id="myCanvas" width="800" height="600">
+    </canvas>
+    <script>
+        var canvas;
+        var canvasContext;
+        var squareX = 0;
+        var squareY = 0;
+        var SQUARE_WIDTH = 20;
+        var SQUARE_HEIGHT = 20;
+        var running = true;
+        
+        var w = window;
+        
+        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+        
+        canvas = document.getElementById("myCanvas");
+            canvasContext =  canvas.getContext("2d");
+        
+        window.onload = function() {
+            canvas = document.getElementById("myCanvas");
+            canvasContext =  canvas.getContext("2d");
+            
+            drawEverything();
+            if (running) {
+                drawMultiSquare();
+            }
+            requestAnimationFrame(doGameLoop);
+        }
+        
+        var doGameLoop = function() {
+            drawEverything();
+            if (running) {
+                drawMultiSquare();
+            }
+            //requestAnimationFrame(doGameLoop);
+        }
+        
+        function drawEverything() {
+            canvasContext.fillStyle = "black";
+            canvasContext.fillRect(0, 0, canvas.width, canvas.height);
+            drawSquare(100, 100, 20, 20, "white");
+        }
+        
+        function drawSquare(leftX, topY, width, height, fillColor) {
+            canvasContext.fillStyle = fillColor;
+            canvasContext.fillRect(leftX, topY, width, height);
+        }
+        
+        function drawMultiSquare() {
+            for (var i = 0; i < 10; i++) {
+                squareX = Math.floor(Math.random() * (canvas.width - SQUARE_WIDTH));
+                squareY = Math.floor(Math.random() * (canvas.height - SQUARE_HEIGHT));
+                drawSquare(squareX, squareY, SQUARE_WIDTH, SQUARE_HEIGHT, "red");
+            }
+        }
+        
+    </script>
+  </body>
+
+</html>
