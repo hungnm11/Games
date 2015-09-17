@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    
+  </head>
+  
+  <body>
+    <canvas id="myCanvas" width="800" height="600">
+    </canvas>
+    <script>
+        var canvas;
+        var canvasContext;
+        var moveX = 100;
+        var moveY = 100;
+        var speed = 256;
+        var objWidthWhite = 30;
+        var objHeightWhite = 30;
+        var objWidthRed = 30;
+        var objHeighRed = 30;
+        var count = 0;
+        var posX = 0;
+        var posY = 0;
+        var heroReady = false;
+        
+        var w = window;
+        var keysDown = {};
+        
+        canvas = document.getElementById("myCanvas");
+        canvasContext = canvas.getContext("2d");
+        
+        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+        
+        window.addEventListener('keydown', function(e) {
+            keysDown[e.keyCode] = true;
+        }, false);
+        
+        window.addEventListener('keyup', function(e) {
+            delete keysDown[e.keyCode];
+        }, false);
+        
+        var resetGame = function() {
+            moveX = canvas.width/2;
+            moveY = canvas.height/2;
+            
+            posX = Math.floor(Math.random()*(canvas.width - objWidthRed));
+            posY = Math.floor(Math.random()*(canvas.height - objHeighRed));
+        }
+        
+        var update = function(modifier) {
+            if (39 in keysDown) {
+                moveX += speed*modifier;
+                if (moveX > canvas.width - objWidthWhite) {
+                    moveX = canvas.width - objWidthWhite;
+                }
+            }
+            
+            if (37 in keysDown) {
+                moveX -= speed*modifier;
+                if (moveX < 0) {
+                    moveX = 0;
+                } 
+            }
+            
+            
+            
+            if (38 in keysDown) {
+                moveY -= speed*modifier;
+                if (moveY < 0) {
+                    moveY = 0;
+                }
+            }
+            
+            if (40 in keysDown) {
+                moveY += speed*modifier;
+                if (moveY > canvas.height - objHeightWhite) {
+                    moveY = canvas.height - objHeightWhite;
+                }
+            }
+            if (moveX <= posX + objWidthRed && posX <= moveX + objWidthWhite && moveY <= posY + objHeighRed && posY <= moveY + objHeightWhite) {
+                count++;
+                resetGame();
+                console.log('hit');
+            }
+        }
+        
+        var render = function() {
+            
+            drawShape(0, 0, canvas.width, canvas.height, "black");
+            drawShape(posX, posY, objWidthRed, objHeighRed, "red");
+            drawShape(moveX,moveY,objWidthWhite,objHeightWhite, "white");
+            
+            console.log(count);
+            canvasContext.fillStyle = "green";
+            canvasContext.font = "24px Helvetica";
+            canvasContext.textAlign = "center";
+            canvasContext.textBaseline = "top";
+            canvasContext.fillText("Score: " + count, 100,20);
+        }
+        
+        var drawShape = function(leftX, topY, width, height, colorShape) {
+            canvasContext.fillStyle = colorShape;
+            canvasContext.fillRect(leftX, topY, width, height);
+        }
+        
+        
+        
+        var main = function() {
+            var now = Date.now();
+            var delta = now - then;
+            update(delta/1000);
+            render();
+            
+            then = now;
+            
+            requestAnimationFrame(main);
+        }
+        
+        var then = Date.now();
+        resetGame();
+        main();
+        
+    </script>
+  </body>
+
+</html>
