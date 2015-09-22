@@ -11,56 +11,145 @@
     <script>
         var canvas;
         var canvasContext;
-        var squareX = 0;
-        var squareY = 0;
+        var shipX = 0;
+        var shipY = 0;
+        var oldShipX = 0;
+        var oldShipY = 0;
         var SQUARE_WIDTH = 20;
         var SQUARE_HEIGHT = 20;
-        var running = true;
-        
+        var speed = 20;
+        var ship = new Image();
+        var putBack = new Image();
+        var back  = new Image();
+        var direction = 'R';
         var w = window;
+        var starPos = [];
         
-        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
         
-        canvas = document.getElementById("myCanvas");
-            canvasContext =  canvas.getContext("2d");
-        
-        window.onload = function() {
+        function canvasGame() {
             canvas = document.getElementById("myCanvas");
             canvasContext =  canvas.getContext("2d");
             
-            drawEverything();
-            if (running) {
-                drawMultiSquare();
+            drawShape(0, 0, canvas.width, canvas.height, "black");
+            back = canvasContext.getImageData(0,0,SQUARE_WIDTH,SQUARE_HEIGHT);
+        }
+        
+        window.onload = function() {
+            canvasGame();
+            
+            stars();
+            makeShip();
+            
+            var framePerSecond = 30;
+            gameLoop = setInterval(function() {
+                doGameLoop();
+            }, 1000/framePerSecond);
+            
+            window.addEventListener('keydown', whatKey, true);
+            
+        }
+        
+        function whatKey(evt) {
+            var flag = 0;
+            oldShipX = shipX;
+            oldShipY = shipY;
+            
+            switch (evt.keyCode) {
+            
+                case 37:
+                    shipX = shipX - speed;
+                    if (shipX < 0) {
+                        shipX = 0;
+                        flag = 1;
+                    }
+                    break;
+                    
+                case 39:
+                    shipX = shipX + speed;
+                    if (shipX > canvas.width - SQUARE_WIDTH) {
+                        shipX = canvas.width - SQUARE_WIDTH;
+                        flag = 1;
+                    }
+                    break;
+                case 38:
+                    shipY = shipY - speed;
+                    if (shipY < 0) {
+                        shipY = 0;
+                        flag = 1;
+                    }
+                    break;
+                    
+                case 40:
+                    shipY = shipY + speed;
+                    if (shipY > canvas.height - SQUARE_HEIGHT) {
+                        shipY = canvas.height - SQUARE_HEIGHT;
+                        flag = 1;
+                    }
+                    break;
             }
-            requestAnimationFrame(doGameLoop);
+            
+            var resultSearch = searchPosXY(shipX,shipY);
+            
+            
         }
         
-        var doGameLoop = function() {
-            drawEverything();
-            if (running) {
-                drawMultiSquare();
+        
+        function searchPosXY(x,y) {
+            
+            for (var i = 0; i < starPos.length; i++) {
+                
+                console.log(starPos[i].x);
+                console.log(x);
+                if (x <= starPos[i].x + 20 && starPos[i].x <= x+20) {
+                    direction = "P";
+                    break;
+                }
             }
-            //requestAnimationFrame(doGameLoop);
+            
+            if (direction == "P") 
+            {
+                bang();
+            }
+            
         }
         
-        function drawEverything() {
-            canvasContext.fillStyle = "black";
-            canvasContext.fillRect(0, 0, canvas.width, canvas.height);
-            drawSquare(100, 100, 20, 20, "white");
+        function bang() {
+            console.log("bumb");
+            clearTimeout(gameLoop);
+            window.addEventListener('keydown', whatKey, true);
+        }
+                            
+        function doGameLoop() {
+           
+            canvasContext.putImageData(putBack, oldShipX, oldShipY);
+            canvasContext.putImageData(ship, shipX, shipY);
+            
         }
         
-        function drawSquare(leftX, topY, width, height, fillColor) {
+        
+        
+        function drawShape(leftX, topY, width, height, fillColor) {
             canvasContext.fillStyle = fillColor;
             canvasContext.fillRect(leftX, topY, width, height);
         }
         
-        function drawMultiSquare() {
-            for (var i = 0; i < 10; i++) {
-                squareX = Math.floor(Math.random() * (canvas.width - SQUARE_WIDTH));
-                squareY = Math.floor(Math.random() * (canvas.height - SQUARE_HEIGHT));
-                drawSquare(squareX, squareY, SQUARE_WIDTH, SQUARE_HEIGHT, "red");
+        function stars() {
+            for(var i = 0; i < 2; i++) {
+                var x = Math.floor(Math.random() * (canvas.width - SQUARE_WIDTH));
+                var y = Math.floor(Math.random() * (canvas.height - SQUARE_HEIGHT));
+                starPos.push({x,y});
+                drawShape(x, y, SQUARE_WIDTH, SQUARE_HEIGHT, "red");
+                putBack = canvasContext.getImageData(0, 0, SQUARE_WIDTH, SQUARE_HEIGHT);
             }
         }
+        
+        function makeShip() {
+            canvasContext.fillStyle = "white";
+            canvasContext.fillRect(shipX, shipY, SQUARE_WIDTH, SQUARE_HEIGHT);
+            ship = canvasContext.getImageData(0, 0, SQUARE_WIDTH, SQUARE_HEIGHT);
+            canvasContext.putImageData(putBack, 0, 0);
+        }
+        
         
     </script>
   </body>
