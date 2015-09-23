@@ -6,150 +6,143 @@
   </head>
   
   <body>
-    <canvas id="myCanvas" width="800" height="600">
+    <canvas id="myCanvas" width="512" height="480">
     </canvas>
     <script>
         var canvas;
         var canvasContext;
-        var shipX = 0;
-        var shipY = 0;
-        var oldShipX = 0;
-        var oldShipY = 0;
-        var SQUARE_WIDTH = 20;
-        var SQUARE_HEIGHT = 20;
-        var speed = 20;
-        var ship = new Image();
-        var putBack = new Image();
-        var back  = new Image();
-        var direction = 'R';
+        var bgReady = false;
+        var bgImage = new Image();
+        var heroReady = false;
+        var heroImage = new Image();
+        var monsterReady = false;
+        var monsterImage = new Image();
+        var score = 0;
+        var hero = {
+                speed: 256,
+                x: 100,
+                y: 100
+            };
+        var monster = {};
+        var keysDown = {};
+        
         var w = window;
-        var starPos = [];
+        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.mozRequestAnimationFrame || w.msRequestAnimationFrame;
+        
+        canvas = document.getElementById("myCanvas");
+        canvasContext = canvas.getContext("2d");
+        
+        bgImage.onload = function() {
+            bgReady = true;
+        };
+        
+        heroImage.onload = function() {
+            heroReady = true;
+        };
+        
+        monsterImage.onload = function() {
+            monsterReady = true;
+        };
+        
+        bgImage.src = "img/background.png";
+        heroImage.src = "img/hero.png";
+        monsterImage.src = "img/monster.png";
+        
+        window.addEventListener("keydown", function(e) {
+            keysDown[e.keyCode] = true;
+        }, false);
+        
+        window.addEventListener("keyup", function(e) {
+            delete keysDown[e.keyCode];
+        }, false);
         
         
-        function canvasGame() {
-            canvas = document.getElementById("myCanvas");
-            canvasContext =  canvas.getContext("2d");
-            
-            drawShape(0, 0, canvas.width, canvas.height, "black");
-            back = canvasContext.getImageData(0,0,SQUARE_WIDTH,SQUARE_HEIGHT);
-        }
-        
-        window.onload = function() {
-            canvasGame();
-            
-            stars();
-            makeShip();
-            
-            var framePerSecond = 30;
-            gameLoop = setInterval(function() {
-                doGameLoop();
-            }, 1000/framePerSecond);
-            
-            window.addEventListener('keydown', whatKey, true);
-            
-        }
-        
-        function whatKey(evt) {
-            var flag = 0;
-            oldShipX = shipX;
-            oldShipY = shipY;
-            
-            switch (evt.keyCode) {
-            
-                case 37:
-                    shipX = shipX - speed;
-                    if (shipX < 0) {
-                        shipX = 0;
-                        flag = 1;
-                    }
-                    break;
-                    
-                case 39:
-                    shipX = shipX + speed;
-                    if (shipX > canvas.width - SQUARE_WIDTH) {
-                        shipX = canvas.width - SQUARE_WIDTH;
-                        flag = 1;
-                    }
-                    break;
-                case 38:
-                    shipY = shipY - speed;
-                    if (shipY < 0) {
-                        shipY = 0;
-                        flag = 1;
-                    }
-                    break;
-                    
-                case 40:
-                    shipY = shipY + speed;
-                    if (shipY > canvas.height - SQUARE_HEIGHT) {
-                        shipY = canvas.height - SQUARE_HEIGHT;
-                        flag = 1;
-                    }
-                    break;
-            }
-            
-            var resultSearch = searchPosXY(shipX,shipY);
-            
-            
-        }
-        
-        
-        function searchPosXY(x,y) {
-            
-            for (var i = 0; i < starPos.length; i++) {
-                
-                console.log(starPos[i].x);
-                console.log(x);
-                if (x <= starPos[i].x + 20 && starPos[i].x <= x+20) {
-                    direction = "P";
-                    break;
+        function whatKeys(modifier) {
+            if (37 in keysDown) {
+                hero.x -= hero.speed * modifier;
+                if (hero.x < 32) {
+                    hero.x = 32;
                 }
             }
             
-            if (direction == "P") 
-            {
-                bang();
+            if (39 in keysDown) {
+                hero.x += hero.speed * modifier;
+                if (hero.x > canvas.width - 64) {
+                    hero.x = canvas.width - 64;
+                }
+            }
+            
+            if (38 in keysDown) {
+                hero.y -= hero.speed * modifier;
+                if (hero.y < 32) {
+                    hero.y = 32;
+                }
+            }
+            
+            if (40 in keysDown) {
+                hero.y += hero.speed * modifier;
+                if (hero.y > canvas.height - 64) {
+                    hero.y = canvas.height - 64;
+                }
+            }
+            
+            if (hero.x <= (monster.x + 32) && monster.x <= (hero.x + 32) && hero.y <= (monster.y + 32) && monster.y <= (hero.y + 32)) {
+                reset();
+                score++;
             }
             
         }
         
-        function bang() {
-            console.log("bumb");
-            clearTimeout(gameLoop);
-            window.addEventListener('keydown', whatKey, true);
-        }
-                            
-        function doGameLoop() {
-           
-            canvasContext.putImageData(putBack, oldShipX, oldShipY);
-            canvasContext.putImageData(ship, shipX, shipY);
+        function render() {
+            if (bgReady) {
+                canvasContext.drawImage(bgImage, 0, 0);
+            }
             
+            initHero();
+            initMonster();
+            canvasContext.fillStyle = "rgb(250, 250, 250)";
+            canvasContext.font = "24px Arial";
+            canvasContext.textAlign = "left";
+            canvasContext.textBaseline = "top";
+            canvasContext.fillText("Score: " + score, 32,32);
         }
         
-        
-        
-        function drawShape(leftX, topY, width, height, fillColor) {
-            canvasContext.fillStyle = fillColor;
-            canvasContext.fillRect(leftX, topY, width, height);
-        }
-        
-        function stars() {
-            for(var i = 0; i < 2; i++) {
-                var x = Math.floor(Math.random() * (canvas.width - SQUARE_WIDTH));
-                var y = Math.floor(Math.random() * (canvas.height - SQUARE_HEIGHT));
-                starPos.push({x,y});
-                drawShape(x, y, SQUARE_WIDTH, SQUARE_HEIGHT, "red");
-                putBack = canvasContext.getImageData(0, 0, SQUARE_WIDTH, SQUARE_HEIGHT);
+        function initHero() {
+            if (heroReady) {
+                canvasContext.drawImage(heroImage, hero.x, hero.y);
             }
         }
         
-        function makeShip() {
-            canvasContext.fillStyle = "white";
-            canvasContext.fillRect(shipX, shipY, SQUARE_WIDTH, SQUARE_HEIGHT);
-            ship = canvasContext.getImageData(0, 0, SQUARE_WIDTH, SQUARE_HEIGHT);
-            canvasContext.putImageData(putBack, 0, 0);
+        function initMonster() {
+            if (monsterReady) {
+                canvasContext.drawImage(monsterImage, monster.x, monster.y);
+            }
         }
         
+        function reset() {
+            hero.x = canvas.width / 2;
+            hero.y = canvas.height / 2;
+            
+            monster.x = 32 + (canvas.width - 64) * Math.random();
+            monster.y = 32 + (canvas.height - 64) * Math.random();
+        }
+        
+        function main() {
+            var now = Date.now();
+            var delta = now - then;
+            
+            whatKeys(delta/1000);
+            render();
+            
+            then = now;
+            
+            requestAnimationFrame(main);
+        }
+        var then = Date.now();
+        render();
+        
+        reset();
+        main();
         
     </script>
   </body>
