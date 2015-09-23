@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    
+  </head>
+  
+  <body>
+    <canvas id="myCanvas" width="512" height="480">
+    </canvas>
+    <script>
+    var canvas;
+    var canvasContext;
+    var coinImage = new Image();
+        
+    var w = window;
+        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+        
+    canvas = document.getElementById("myCanvas");
+        
+    function sprites(options) {
+        
+        var that = {},
+            frameIndex = 0,
+            tickCount = 0,
+            ticksPerFrame = options.ticksPerFrame || 0,
+            numberOfFrames = options.numberOfFrames || 1;
+        
+        that.context = options.context;
+        that.image = options.image;
+        that.width = options.width;
+        that.height = options.height;
+        
+        that.update = function() {
+            
+            tickCount += 1;
+            if (tickCount > ticksPerFrame) {
+                tickCount = 0;
+                if (frameIndex < numberOfFrames - 1) {
+                    frameIndex += 1;
+                } else {
+                    frameIndex = 0;
+                }
+            }
+            
+        };
+        
+        that.render = function() {
+            
+            that.context.clearRect(0, 0, that.width, that.height);
+            
+            that.context.drawImage(that.image, 
+                                   frameIndex * that.width / numberOfFrames, 
+                                   0, 
+                                   that.width / numberOfFrames, 
+                                   that.height, 
+                                   0, 
+                                   0, 
+                                   that.width / numberOfFrames, 
+                                   that.height);
+        };
+        
+        return that;
+    }
+    
+    var coin = sprites({
+        context: canvas.getContext("2d"),
+        image: coinImage,
+        width: 1000,
+        height: 100,
+        numberOfFrames: 10,
+        ticksPerFrame: 4
+    });
+        
+    function main() {
+    
+        window.requestAnimationFrame(main);
+        coin.update();
+        coin.render();
+    }
+    
+    main();
+    coinImage.src = "img/sprites/coin-sprite-animation.png";
+        
+    </script>
+  </body>
+
+</html>
