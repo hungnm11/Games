@@ -18,7 +18,7 @@
         var monsterReady = false;
         var monsterImage = new Image();
         var backgroundGame;
-        var numMonster = 15;
+        var numMonster = 5;
         var monster = [];
         var score = 0;
         var hero;
@@ -91,14 +91,15 @@
             for (i = 0; i < monster.length; i++) {
                 
                 if (heroX <= (monster[i].posX + 32 ) && monster[i].posX <= (heroX + 32) && heroY <= (monster[i].posY + 32) && monster[i].posY <= (heroY + 32)) {
-                    hitMonster();
+                    hitMonster(i);
                     break;
                 }
             }
         }
         
-        function hitMonster() {
-            console.log("hit");
+        function hitMonster(i) {
+            console.log(i);
+            
         }
         
         function loadImages(options) {
@@ -157,18 +158,14 @@
             });
             
             
-            
             monster[monsterIndex].posX = 32 + Math.floor(Math.random() * (backgroundGame.width - 64));
             monster[monsterIndex].posY = 32 + Math.floor(Math.random() * (backgroundGame.height - 64));
 
-            if (monster[monsterIndex].posX < hero.posX) {
-                
-            }
             
-            monsterImage.onload = function() {
-                monsterReady = true;
-            };
-            monsterImage.src = "img/monster.png";
+                monsterImage.onload = function() {
+                    monsterReady = true;
+                };
+                monsterImage.src = "img/monster.png";
       
         }
         
