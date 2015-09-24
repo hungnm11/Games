@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    
+  </head>
+  
+  <body>
+    <canvas id="myCanvas" width="800" height="600">
+    </canvas>
+    <script>
+    var canvas;
+    var canvasContext;
+    var numCoins = 10;
+    var coins = [];
+    var coinImg = new Image();
+    var w = window;
+        
+        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.msRequestAnimationFrame || w.mozRequestAnimationFrame;
+        
+    canvas = document.getElementById("myCanvas");
+    canvasContext = canvas.getContext("2d");
+        
+    function gameLoop() {
+        canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+        window.requestAnimationFrame(gameLoop);
+    
+        for (var i = 0; i < coins.length; i++) {
+            coins[i].update();
+            coins[i].render();
+        }
+    }
+        
+    function sprites(options) {
+        var that = {},
+            tickCount = 0,
+            ticksPerFrame = options.ticksPerFrame || 0,
+            frameIndex = 0,
+            numberOfFrames = options.numberOfFrames || 1;
+        
+        that.context = options.context;
+        that.width = options.width;
+        that.height = options.height;
+        that.image = options.image;
+        that.x = 0;
+        that.y = 0;
+        that.scaleRadio = 1;
+        
+        that.update = function() {
+            tickCount += 1;
+            if (tickCount > ticksPerFrame) {
+                tickCount = 0;
+                if (frameIndex < numberOfFrames - 1) {
+                    frameIndex += 1;
+                } else {
+                    frameIndex = 0;
+                }
+            }
+        };
+        
+        that.render = function() {
+            
+            that.context.drawImage(
+                that.image, 
+                frameIndex * that.width / numberOfFrames, 
+                0, 
+                that.width / numberOfFrames, 
+                that.height, 
+                that.x, 
+                that.y, 
+                that.width / numberOfFrames * that.scaleRadio, 
+                that.height * that.scaleRadio);
+        };
+        
+        return  that;
+    }
+        
+    function spawCoins() {
+        var coniIndex;
+        
+        coniIndex =  coins.length;
+        coins[coniIndex] = sprites({
+            context:canvasContext,
+            width: 1000,
+            height: 100,
+            image: coinImg,
+            numberOfFrames: 10,
+            ticksPerFrame: i
+        });  
+        
+        coins[coniIndex].x = Math.floor(Math.random() * canvas.width);
+        coins[coniIndex].y = Math.floor(Math.random() * canvas.height);
+        
+        coins[coniIndex].scaleRadio = Math.random() * 0.5 + 0.5;
+    }
+
+    for (var i = 0; i < numCoins; i++) {
+        spawCoins();
+    }
+        
+    
+        
+    gameLoop();   
+    coinImg.src = "img/sprites/coin-sprite-animation.png";
+    
+    </script>
+  </body>
+
+</html>
