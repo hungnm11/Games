@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html>
+  
+  <head>
+    
+  </head>
+  
+  <body>
+    <canvas id="myCanvas" width="512" height="480">
+    </canvas>
+    <script>
+        var canvas;
+        var canvasContext;
+        var bgReady = false;
+        var bgImage = new Image();
+        var heroReady = false;
+        var heroImage = new Image();
+        var monsterReady = false;
+        var monsterImage = new Image();
+        var backgroundGame;
+        var numMonster = 15;
+        var monster = [];
+        var score = 0;
+        var hero;
+        var keysDown = {};
+        
+        var w = window;
+        requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.mozRequestAnimationFrame || w.msRequestAnimationFrame;
+        
+        canvas = document.getElementById("myCanvas");
+        canvasContext = canvas.getContext("2d");
+        
+        bgImage.onload = function() {
+            bgReady = true;
+        };
+        
+        heroImage.onload = function() {
+            heroReady = true;
+        };
+        
+        bgImage.src = "img/background.png";
+        heroImage.src = "img/hero.png";
+       
+        window.addEventListener("keydown", function(e) {
+            keysDown[e.keyCode] = true;
+        }, false);
+        
+        window.addEventListener("keyup", function(e) {
+            delete keysDown[e.keyCode];
+        }, false);
+        
+        function whatKey(modifier) {
+            
+            // Left Key
+            if (37 in keysDown) {
+                hero.posX -= hero.speed* modifier;
+                if (hero.posX < 32) {
+                    hero.posX = 32;
+                }
+            }
+            
+            // Right Key
+            if (39 in keysDown) {
+                hero.posX += hero.speed * modifier;
+                if (hero.posX > backgroundGame.width - 64) {
+                    hero.posX = backgroundGame.width - 64;
+                }
+            }
+            
+            // Up Key
+            if (38 in keysDown) {
+                hero.posY -= hero.speed * modifier;
+                if (hero.posY < 32) {
+                    hero.posY = 32;
+                }
+            }
+            
+            // Down Key
+            if (40 in keysDown) {
+                hero.posY += hero.speed * modifier;
+                if (hero.posY > backgroundGame.height - 64) {
+                    hero.posY = backgroundGame.height - 64;
+                }
+            }
+            
+            searchMonster(hero.posX, hero.posY);
+        }
+        
+        function searchMonster(heroX, heroY) {
+            var i;
+            for (i = 0; i < monster.length; i++) {
+                
+                if (heroX <= (monster[i].posX + 32 ) && monster[i].posX <= (heroX + 32) && heroY <= (monster[i].posY + 32) && monster[i].posY <= (heroY + 32)) {
+                    console.log("hit");
+                }
+            }
+        }
+        
+        function loadImages(options) {
+            var that = {};
+            
+            that.context = options.context;
+            that.width = options.width;
+            that.posX = options.posX;
+            that.posY = options.posY;
+            that.height = options.height;
+            that.image = options.image;
+            that.speed =options.speed;
+            
+            that.render = function() {
+                that.context.drawImage(that.image, that.posX, that.posY, that.width, that.height);
+            };
+            
+            return that;
+            
+        }
+        
+        // Load Background
+        backgroundGame = loadImages({
+            context: canvasContext,
+            posX: 0,
+            posY: 0,
+            width: 512,
+            height: 480,
+            image: bgImage
+        });
+        
+        // Load Hero Image
+        hero = loadImages({
+            context: canvasContext,
+            posX: 100,
+            posY: 100,
+            width: 32,
+            height: 32,
+            speed: 256,
+            image: heroImage
+        });
+        
+        // Create function and load monster image
+        function createMonster() {
+            
+            var monsterIndex;
+            
+            monsterIndex = monster.length;
+            monster[monsterIndex] = loadImages({
+                context: canvasContext,
+                posX:0,
+                posY:0,
+                width: 30,
+                height: 32,
+                image: monsterImage
+            });
+            
+            monster[monsterIndex].posX = 32 + Math.floor(Math.random() * (backgroundGame.width - 64));
+            monster[monsterIndex].posY = 32 + Math.floor(Math.random() * (backgroundGame.height - 64));
+
+            monsterImage.onload = function() {
+                monsterReady = true;
+            };
+            monsterImage.src = "img/monster.png";
+      
+        }
+        
+        function gameLoop() {
+            
+            var now = Date.now();
+            var delta = now - then;
+            whatKey(delta/1000);
+            backgroundGame.render();
+            hero.render();
+            
+            then = now;
+            
+            window.requestAnimationFrame(gameLoop);
+            
+            for (var i = 0; i < monster.length; i++) {
+                monster[i].render();
+            }
+            
+        }
+        
+        for (var i = 0; i < numMonster; i++) {
+            createMonster();
+        }
+        
+        var then = Date.now();
+        gameLoop();
+        
+    </script>
+  </body>
+
+</html>
