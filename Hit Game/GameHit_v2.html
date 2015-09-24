@@ -91,9 +91,14 @@
             for (i = 0; i < monster.length; i++) {
                 
                 if (heroX <= (monster[i].posX + 32 ) && monster[i].posX <= (heroX + 32) && heroY <= (monster[i].posY + 32) && monster[i].posY <= (heroY + 32)) {
-                    console.log("hit");
+                    hitMonster();
+                    break;
                 }
             }
+        }
+        
+        function hitMonster() {
+            console.log("hit");
         }
         
         function loadImages(options) {
@@ -128,8 +133,8 @@
         // Load Hero Image
         hero = loadImages({
             context: canvasContext,
-            posX: 100,
-            posY: 100,
+            posX: backgroundGame.width/2,
+            posY: backgroundGame.height/2,
             width: 32,
             height: 32,
             speed: 256,
@@ -151,9 +156,15 @@
                 image: monsterImage
             });
             
+            
+            
             monster[monsterIndex].posX = 32 + Math.floor(Math.random() * (backgroundGame.width - 64));
             monster[monsterIndex].posY = 32 + Math.floor(Math.random() * (backgroundGame.height - 64));
 
+            if (monster[monsterIndex].posX < hero.posX) {
+                
+            }
+            
             monsterImage.onload = function() {
                 monsterReady = true;
             };
