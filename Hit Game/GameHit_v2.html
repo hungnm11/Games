@@ -83,10 +83,10 @@
                 }
             }
             
-            searchMonster(hero.posX, hero.posY);
+            collisionMonster(hero.posX, hero.posY);
         }
         
-        function searchMonster(heroX, heroY) {
+        function collisionMonster(heroX, heroY) {
             var i;
             for (i = 0; i < monster.length; i++) {
                 
@@ -169,6 +169,7 @@
       
         }
         
+                
         function gameLoop() {
             
             var now = Date.now();
@@ -193,6 +194,7 @@
         
         var then = Date.now();
         gameLoop();
+        
         
     </script>
   </body>
