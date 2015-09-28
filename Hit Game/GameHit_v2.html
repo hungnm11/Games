@@ -91,15 +91,15 @@
             for (i = 0; i < monster.length; i++) {
                 
                 if (heroX <= (monster[i].posX + 32 ) && monster[i].posX <= (heroX + 32) && heroY <= (monster[i].posY + 32) && monster[i].posY <= (heroY + 32)) {
-                    hitMonster(i);
+                    monster[i].status = 0;
                     break;
                 }
             }
         }
         
-        function hitMonster(i) {
-            console.log(i);
-            
+        function reset() {
+            alert("You Win");
+            document.location.reload();
         }
         
         function loadImages(options) {
@@ -111,7 +111,8 @@
             that.posY = options.posY;
             that.height = options.height;
             that.image = options.image;
-            that.speed =options.speed;
+            that.speed = options.speed;
+            that.status = options.status;
             
             that.render = function() {
                 that.context.drawImage(that.image, that.posX, that.posY, that.width, that.height);
@@ -154,7 +155,8 @@
                 posY:0,
                 width: 30,
                 height: 32,
-                image: monsterImage
+                image: monsterImage,
+                status: 1
             });
             
             
@@ -169,7 +171,14 @@
       
         }
         
-                
+        function showScore() {
+            canvasContext.fillStyle = "rgb(250, 250, 250)";
+            canvasContext.font = "24px helvetica";
+            canvasContext.textAlign = "left";
+            canvasContext.textBaseline = "top";
+            canvasContext.fillText("Score: " + score, 32, 32);
+        }
+        
         function gameLoop() {
             
             var now = Date.now();
@@ -183,7 +192,9 @@
             window.requestAnimationFrame(gameLoop);
             
             for (var i = 0; i < monster.length; i++) {
-                monster[i].render();
+                if (monster[i].status == 1) {
+                    monster[i].render();
+                }
             }
             
         }
@@ -194,7 +205,6 @@
         
         var then = Date.now();
         gameLoop();
-        
         
     </script>
   </body>
