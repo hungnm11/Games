@@ -18,7 +18,7 @@
         var monsterReady = false;
         var monsterImage = new Image();
         var backgroundGame;
-        var numMonster = 5;
+        var numMonster = 10;
         var monster = [];
         var showScore;
         var score = 0;
@@ -218,15 +218,15 @@
                 status: 1
             });
             
-            
             monster[monsterIndex].posX = Math.floor(30 + (1 + (backgroundGame.width - 60) - 30) * Math.random());
             monster[monsterIndex].posY = Math.floor(30 + (1 + (backgroundGame.height - 60) - 30) * Math.random());
-
             
-                monsterImage.onload = function() {
-                    monsterReady = true;
-                };
-                monsterImage.src = "img/monster.png";
+            
+            monsterImage.onload = function() {
+                monsterReady = true;
+            };
+            
+            monsterImage.src = "img/monster.png";
       
         }
         
@@ -265,12 +265,11 @@
             var delta = now - then;
             whatKey(delta/1000);
             backgroundGame.render();
-            hero.render();
-            drawScore();
             
-            then = now;
-            
-            window.requestAnimationFrame(gameLoop);
+            for (var i = 0; i < coins.length; i++) {
+                coins[i].update();
+                coins[i].spriteImage();
+            }
             
             for (var i = 0; i < monster.length; i++) {
                 if (monster[i].status == 1) {
@@ -278,11 +277,12 @@
                 } 
             }
             
-            for (var i = 0; i < coins.length; i++) {
-                coins[i].update();
-                coins[i].spriteImage();
-            }
+            hero.render();
+            drawScore();
             
+            then = now;
+            
+            window.requestAnimationFrame(gameLoop);
         }
         
         for (var i = 0; i < numMonster; i++) {
