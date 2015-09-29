@@ -24,6 +24,10 @@
         var score = 0;
         var hero;
         var keysDown = {};
+        var coinReady = false;
+        var coinImage = new Image();
+        var coins = [];
+        var numCoin = 5;
         
         var w = window;
         requestAnimationFrame = w.requestAnimationFrame || w.webkitRequestAnimationFrame || w.mozRequestAnimationFrame || w.msRequestAnimationFrame;
@@ -39,8 +43,13 @@
             heroReady = true;
         };
         
+        coinImage.onload = function() {
+            coinReady = true;
+        };
+        
         bgImage.src = "img/background.png";
         heroImage.src = "img/hero.png";
+        coinImage.src = "img/sprites/coin-sprite-animation.png";
        
         window.addEventListener("keydown", function(e) {
             keysDown[e.keyCode] = true;
@@ -87,6 +96,7 @@
             collisionMonster(hero.posX, hero.posY);
         }
         
+        //Collision
         function collisionMonster(heroX, heroY) {
             var i;
             for (i = 0; i < monster.length; i++) {
@@ -108,8 +118,13 @@
             document.location.reload();
         }
         
+        //Loading Image
         function loadImages(options) {
-            var that = {};
+            var that = {},
+                frameIndex = 0,
+                tickCount = 0,
+                ticksPerFrame = options.ticksPerFrame || 0,
+                numberOfFrames = options.numberOfFrames || 1;
             
             that.context = options.context;
             that.width = options.width;
@@ -125,11 +140,36 @@
                 that.context.drawImage(that.image, that.posX, that.posY, that.width, that.height);
             };
             
+            that.update = function() {
+                tickCount += 1;
+                if (tickCount > ticksPerFrame) {
+                    tickCount = 0;
+                    if (frameIndex < numberOfFrames - 1) {
+                        frameIndex += 1;
+                    } else {
+                        frameIndex = 0;
+                    }
+                }
+            };
+            
+            that.spriteImage = function() {
+                that.context.drawImage(
+                    that.image, 
+                    frameIndex * that.width / numberOfFrames, 
+                    0, 
+                    that.width / numberOfFrames, 
+                    that.height, 
+                    that.posX, 
+                    that.posY, 
+                    32, 
+                    32);  
+            };
+            
             return that;
             
         }
         
-        
+        // Draw Score
         function drawScore() {
             canvasContext.fillStyle = "rgb(250, 250, 250)";
             canvasContext.font = "24px helvetica";
@@ -160,6 +200,8 @@
             image: heroImage
         });
         
+        
+        
         // Create function and load monster image
         function createMonster() {
             
@@ -177,8 +219,8 @@
             });
             
             
-            monster[monsterIndex].posX = 32 + Math.floor(Math.random() * (backgroundGame.width - 64));
-            monster[monsterIndex].posY = 32 + Math.floor(Math.random() * (backgroundGame.height - 64));
+            monster[monsterIndex].posX = Math.floor(30 + (1 + (backgroundGame.width - 60) - 30) * Math.random());
+            monster[monsterIndex].posY = Math.floor(30 + (1 + (backgroundGame.height - 60) - 30) * Math.random());
 
             
                 monsterImage.onload = function() {
@@ -188,8 +230,35 @@
       
         }
         
+        // Create coins
+        function createCoins() {
+            
+            var coinsIndex;
+            
+            coinsIndex = coins.length;
+            //Load coin image
+            coins[coinsIndex] = loadImages({
+                context:canvasContext,
+                posX: 0,
+                posY: 0,
+                width: 1000,
+                height: 100,
+                image: coinImage,
+                numberOfFrames: 10,
+                ticksPerFrame: i
+            });
+            
+            coins[coinsIndex].posX = Math.floor(30 + (1 + (backgroundGame.width - 60) - 30) * Math.random());
+            coins[coinsIndex].posY = Math.floor(30 + (1 + (backgroundGame.height - 60) - 30) * Math.random());
+            
+            coinImage.onload = function() {
+                coinReady = true;
+            };
+
+            coinImage.src = "img/sprites/coin-sprite-animation.png";
+        }
         
-        
+        // Loop
         function gameLoop() {
             
             var now = Date.now();
@@ -209,10 +278,19 @@
                 } 
             }
             
+            for (var i = 0; i < coins.length; i++) {
+                coins[i].update();
+                coins[i].spriteImage();
+            }
+            
         }
         
         for (var i = 0; i < numMonster; i++) {
             createMonster();
+        }
+        
+        for (var i = 0; i < numCoin; i++) {
+            createCoins();
         }
         
         var then = Date.now();
