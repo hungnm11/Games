@@ -18,7 +18,7 @@
         var monsterReady = false;
         var monsterImage = new Image();
         var backgroundGame;
-        var numMonster = 10;
+        var numMonster = 2;
         var monster = [];
         var showScore;
         var score = 0;
@@ -218,12 +218,32 @@
                 status: 1
             });
             
-            monster[monsterIndex].posX = (monsterIndex + 1) * 32;
-            monster[monsterIndex].posY = (monsterIndex + 1) * 32;
-            /*
+            
+//            monster[monsterIndex].posX = (monsterIndex + 1) * 32;
+//            monster[monsterIndex].posY = (monsterIndex + 1) * 32;
+            
             monster[monsterIndex].posX = Math.floor(30 + (1 + (backgroundGame.width - 60) - 30) * Math.random());
             monster[monsterIndex].posY = Math.floor(30 + (1 + (backgroundGame.height - 60) - 30) * Math.random());
-            */
+            
+            console.log(monster[monsterIndex].posX);
+            if (monster[monsterIndex].posX != "undefined" && monsterIndex == 0) 
+            {
+                monster[monsterIndex].posX = monster[monsterIndex].posX;
+            } 
+            else if (monster[monsterIndex - 1].posX >= monster[monsterIndex].posX) 
+            {
+                monster[monsterIndex].posX = monster[monsterIndex].posX + 32;
+                console.log(monster[monsterIndex].posX);
+            }
+            
+            if (monster[monsterIndex].posY != "undefined" && monsterIndex == 0) 
+            {
+                monster[monsterIndex].posY = monster[monsterIndex].posY;
+            } 
+            else if (monster[monsterIndex - 1].posY >= monster[monsterIndex].posY) 
+            {
+                monster[monsterIndex].posY = monster[monsterIndex].posY + 32;
+            }
             
             monsterImage.onload = function() {
                 monsterReady = true;
