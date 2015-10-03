@@ -2,6 +2,12 @@
 	<head>
 		<title>Background</title>
 		<style>
+			canvas {
+				position: absolute;
+				top: 0px;
+				left: 0px;
+				background: transparent;
+			}
 			#myCanvas {
 				z-index: -2;
 			}
@@ -18,7 +24,7 @@
 			
 			var imageRepository =  new function() {
 				this.background = new Image();
-				this.ship = new Image();
+				this.spaceship = new Image();
 				
 				var numImages = 3;
 				var numLoaded = 0;
@@ -33,12 +39,12 @@
 					imageLoaded();
 				};
 				
-				this.ship.onload = function() {
+				this.spaceship.onload = function() {
 					imageLoaded();
 				};
 				
 				this.background.src = "img/bg.png";
-				this.ship.src = "img/ship.png";
+				this.spaceship.src = "img/ship.png";
 			}
 			
 			function Drawable() {
@@ -70,19 +76,41 @@
 				};
 			}
 			
+			
 			Background.prototype = new Drawable();
+			
+			function Ship() {
+				this.draw = function() {
+					this.context.drawImage(imageRepository.spaceship, this.x, this.y);
+				}
+			}
+			
+			Ship.prototype = new Drawable();
 			
 			function Game(){
 				this.init = function() {
 					this.canvas = document.getElementById("myCanvas");
+					this.shipCanvas = document.getElementById("ship");
+					
 					if (this.canvas.getContext)  {
 						this.canvasContext = this.canvas.getContext("2d");
+						this.shipContext = this.shipCanvas.getContext("2d");
+						
 						Background.prototype.context = this.canvasContext;
 						Background.prototype.canvasWidth = this.canvas.width;
 						Background.prototype.canvasHeight = this.canvas.height;
+						Ship.prototype.context = this.shipContext;
+						Ship.prototype.canvasWidth = this.shipCanvas.width;
+						Ship.prototype.canvasHeight = this.shipCanvas.height;
 						
 						this.background =  new Background();
 						this.background.init(0,0);
+						
+						this.ship = new Ship();
+						var shipStartX = this.shipCanvas.width/2 - imageRepository.spaceship.width;
+						var shipStartY = this.shipCanvas.height/4*3 + imageRepository.spaceship.height*2;
+						this.ship.init(shipStartX, shipStartY, imageRepository.spaceship.width,
+			               imageRepository.spaceship.height);
 						return true;
 					} else {
 						return false;
@@ -97,6 +125,7 @@
 			function animate() {
 				window.requestAnimationFrame(animate);
 				game.background.draw();
+				game.ship.draw();
 			}
 			
 			window.requestAnimationFrame = (function() {
