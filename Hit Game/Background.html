@@ -1,0 +1,104 @@
+<html>
+	<head>
+		<title>Background</title>
+	</head>
+	<body>
+		<canvas id="myCanvas" width="600" height="360"></canvas>
+		<script>
+			var canvas;
+			var canvasContext;
+			
+			var imageBg = new function() {
+				this.empty = null;
+				this.background = new Image();
+				this.background.src = "img/bg.png";
+			}
+			
+			
+			function Drawable() {
+				this.init = function(x,y) {
+					this.x = x;
+					this.y = y;
+				};
+				
+				this.speed = 0;
+				this.canvasWidth = 0;
+				this.canvasHeight = 0;
+				
+				this.draw = function() {
+				};
+			}
+			
+			function Background() {
+				this.speed = 1;
+				this.draw = function() {
+					this.y += this.speed;
+					this.context.drawImage(imageBg.background, this.x, this.y);
+					this.context.drawImage(imageBg.background, this.x, this.y - this.canvasHeight);
+					
+					if (this.y >= this.canvasHeight) {
+						this.y = 0;
+					}
+				};
+			}
+			
+			Background.prototype = new Drawable();
+			
+			console.log(Background.prototype);
+			
+			function Game() {
+				
+				this.init =  function() {
+					this.canvas = document.getElementById("myCanvas");
+					
+					if (this.canvas.getContext) {
+						this.canvasContext =  this.canvas.getContext("2d");
+						Background.prototype.context = this.canvasContext;
+						Background.prototype.canvasWidth = this.canvas.width;
+						Background.prototype.canvasHeight = this.canvas.height;
+						
+						this.background = new Background();
+						this.background.init(0,0);
+						return true;
+					} else {
+						return false;
+					}
+					
+					this.start = function() {
+					
+					};
+				};
+				
+				this.start = function() {
+					animate();
+				};
+			}
+			
+			function animate() {
+				requestAnimationFrame(animate);
+				game.background.draw();
+			}
+			
+			window.requestAnimationFrame = (function() {
+				return window.requestAnimationFrame ||
+					window.webkitRequestAnimationFrame ||
+					window.mozRequestAnimationFrame ||
+					window.oRequestAnimationFrame ||
+					window.msRequestAnimationFrame ||
+					function(callback, element) {
+						window.setTimeout(callback, 1000/60);
+					};
+			})();
+			
+			function init() {
+				if (game.init()) {
+					game.start();
+				}
+			}
+			
+			var game = new Game();
+			init();
+			
+		</script>
+	</body>
+</html>
