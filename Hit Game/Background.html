@@ -89,10 +89,21 @@
                                 this.x = 0;
                             } 
                         } else if (KEY_STATUS.right) {
-                            
                             this.x += this.speed;
-                            
-                        }
+							if (this.x >= this.shipWidth - this.width) {
+								this.x = this.shipWidth - this.width;
+							}
+                        } else if (KEY_STATUS.up) {
+							this.y -= this.speed;
+							if (this.y <= 0) {
+								this.y = 0;
+							}
+						} else if (KEY_STATUS.down) {
+							this.y += this.speed;
+							if (this.y >= this.shipHeight - this.height) {
+								this.y = this.shipHeight - this.height;
+							}
+						}
                         
                         this.draw();
                     }
