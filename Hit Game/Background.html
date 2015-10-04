@@ -52,7 +52,9 @@
                 
                 this.draw = function() {
                 };
-                    
+                
+                this.move = function() {
+                };
             }
             
             function Background() {
@@ -71,8 +73,29 @@
             Background.prototype = new Drawable();
             
             function Ship() {
+                this.speed = 3;
                 this.draw = function() {
                     this.context.drawImage(imageRepository.spaceship, this.x, this.y);
+                };
+                
+                this.move = function() {
+                    if (KEY_STATUS.left || KEY_STATUS.right || KEY_STATUS.down || KEY_STATUS.up) {
+                        
+                        this.context.clearRect(this.x, this.y, this.width, this.height);
+                        
+                        if (KEY_STATUS.left) {
+                            this.x -= this.speed;
+                            if (this.x <= 0) {
+                                this.x = 0;
+                            } 
+                        } else if (KEY_STATUS.right) {
+                            
+                            this.x += this.speed;
+                            
+                        }
+                        
+                        this.draw();
+                    }
                 };
             }
             
@@ -115,11 +138,41 @@
             }
             
             function animate() {
-                
-                game.background.draw();
                 requestAnimationFrame(animate);
+                game.background.draw();
+                game.ship.move();
+                
             }
             
+            
+            KEY_CODES = {
+                32: 'space',
+                37: 'left',
+                38: 'up',
+                39: 'right',
+                40: 'down'
+            };
+            
+            KEY_STATUS = {};
+            for (code in KEY_CODES) {
+                KEY_STATUS[KEY_CODES[code]] = false;
+            }
+            
+            document.onkeydown =  function(e) {
+                var keyCode = (e.keyCode) ? e.keyCode : e.charCode;
+                if (KEY_CODES[keyCode]) {
+                    e.preventDefault();
+                    KEY_STATUS[KEY_CODES[keyCode]] = true;
+                }
+            }
+            
+            document.onkeyup = function(e) {
+                var keyCode = (e.keyCode) ? e.keyCode : e.charCode;
+                if (KEY_CODES[keyCode]) {
+                    e.preventDefault();
+                    KEY_STATUS[KEY_CODES[keyCode]] = false;
+                }
+            }
             
             window.requestAnimationFrame = (function() {
                 return window.requestAnimationFrame ||
