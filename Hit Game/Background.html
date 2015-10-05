@@ -11,6 +11,10 @@
 			#myCanvas {
 				z-index: -2;
 			}
+            
+            #main {
+				z-index: -1;
+			}
 			
 			#ship {
 				z-index: 0;
@@ -19,7 +23,9 @@
 	</head>
 	<body onload="init()">
 		<canvas id="myCanvas" width="600" height="360"></canvas>
+        <canvas id="main" width="600" height="360"></canvas>
 		<canvas id="ship" width="600" height="360"></canvas>
+        
 		<script>
 			
 			var game = new Game();
@@ -33,9 +39,33 @@
             var imageRepository = new function() {
                 this.empty = null;
                 this.background = new Image();
-                this.background.src = "img/bg.png";
                 this.spaceship = new Image();
+                this.bullet = new Image();
+                
+                var numImages = 3;
+                var numLoaded = 0;
+                function imageloaded() {
+                    numLoaded++;
+                    if (numLoaded == numImages) {
+                        window.init();
+                    }
+                }
+                
+                this.background.onload = function() {
+                    imageloaded();
+                };
+                
+                this.spaceship.onload = function() {
+                    imageloaded();
+                };
+                
+                this.bullet.onload = function() {
+                    imageloaded();
+                };
+                
+                this.background.src = "img/bg.png";
                 this.spaceship.src = "img/ship.png";
+                this.bullet.src = "img/bullet.png";
             };
 			
             function Drawable() {
@@ -74,11 +104,18 @@
             
             function Ship() {
                 this.speed = 3;
+                this.bulletPool = new Pool(30);
+                this.bulletPool.init();
+                var fireRate = 15;
+                var counter = 0;
                 this.draw = function() {
                     this.context.drawImage(imageRepository.spaceship, this.x, this.y);
                 };
                 
                 this.move = function() {
+                    
+                    counter++;
+                    
                     if (KEY_STATUS.left || KEY_STATUS.right || KEY_STATUS.down || KEY_STATUS.up) {
                         
                         this.context.clearRect(this.x, this.y, this.width, this.height);
@@ -107,18 +144,101 @@
                         
                         this.draw();
                     }
+                    
+                    if (KEY_STATUS.space && counter >= fireRate) {
+                        this.fire();
+                        counter = 0;
+                    }
+                    
+                    this.fire = function() {
+                        this.bulletPool.getTwo(this.x + 6, this.y, 3, this.x + 33, this.y, 3);
+                    };
                 };
             }
             
             Ship.prototype = new Drawable();
             
+            function Pool(maxsize) {
+                var size = maxsize;
+                var pool = [];
+                
+                this.init = function() {
+                    for (var i = 0; i < size; i++) {
+                        var bullet = new Bullet();
+                        bullet.init(0, 0, imageRepository.bullet.width, imageRepository.bullet.height);
+                        pool[i] = bullet;
+                    }
+                };
+                
+                this.get = function(x, y, speed) {
+                    if (!pool[size - 1].alive) {
+                        pool[size - 1].spawn(x, y, speed);
+                        pool.unshift(pool.pop());
+                    }
+                };
+                
+                this.getTwo = function(x1, y1, speed1, x2, y2, speed2) {
+                if(!pool[size - 1].alive &&
+                   !pool[size - 2].alive) {
+                        this.get(x1, y1, speed1);
+                        this.get(x2, y2, speed2);
+                     }
+                };
+                
+                this.animate = function() {
+                for (var i = 0; i < size; i++) {
+                    if (pool[i].alive) {
+                        if (pool[i].draw()) {
+                            pool[i].clear();
+                            pool.push((pool.splice(i,1))[0]);
+                        }
+                    }
+                    else
+                        break;
+                    }
+                };
+                
+            }
+            
+            function Bullet() {
+                this.alive = false;
+                
+                this.spawn = function(x, y, speed) {
+                    this.x = x;
+                    this.y = y;
+                    this.speed = speed;
+                    this.alive = true;
+                };
+                
+                this.draw = function() {
+                    this.context.clearRect(this.x, this.y, this.width, this.height);
+                    this.y -= this.speed;
+                    if (this.y <= 0 - this.height) {
+                        return true;
+                    } else {
+                        this.context.drawImage(imageRepository.bullet, this.x, this.y);
+                    }
+                };
+                
+                this.clear = function() {
+                    this.x = 0;
+                    this.y = 0;
+                    this.speed = 0;
+                    this.alive = false;
+                };
+            }
+            
+            Bullet.prototype = new Drawable();
+            
             function Game() {
                 this.init = function() {
                     this.canvas = document.getElementById("myCanvas");
                     this.shipCanvas = document.getElementById("ship");
+                    this.mainCanvas = document.getElementById("main");
                     if (this.canvas.getContext && this.shipCanvas.getContext) {
                         this.bgContext = this.canvas.getContext("2d");
                         this.shipContext = this.shipCanvas.getContext("2d");
+                        this.mainContext = this.mainCanvas.getContext("2d");
                         
                         Background.prototype.context = this.bgContext;
                         Background.prototype.canvasWidth = this.canvas.width;
@@ -128,6 +248,10 @@
                         Ship.prototype.shipWidth = this.shipCanvas.width;
                         Ship.prototype.shipHeight = this.shipCanvas.height;
                         
+                        Bullet.prototype.context = this.mainContext;
+                        Bullet.prototype.mainWidth = this.mainCanvas.width;
+                        Bullet.prototype.mainHeight = this.mainCanvas.height;
+                        
                         this.background = new Background();
                         this.background.init(0,0);
                         
@@ -136,6 +260,7 @@
                         var shipStartY = this.shipCanvas.height / 4*3 + imageRepository.spaceship.height * 2;
                        
                         this.ship.init(shipStartX, shipStartY, imageRepository.spaceship.width, imageRepository.spaceship.height);
+                        
                         return true;
                     } else {
                         return false;
@@ -152,6 +277,7 @@
                 requestAnimationFrame(animate);
                 game.background.draw();
                 game.ship.move();
+                game.ship.bulletPool.animate();
                 
             }
             
